@@ -98,8 +98,8 @@ export const resetIn = (iso: string | null, now: number) => {
   if (ms <= 0) return 'resets now'
   const m = Math.round(ms / 60_000)
   if (m < 60) return 'resets in ' + m + 'm'
-  const h = Math.floor(m / 60)
-  return h < 48 ? 'resets in ' + h + 'h ' + (m % 60) + 'm' : 'resets in ' + Math.round(h / 24) + 'd'
+  const hours = Math.floor(m / 60)
+  return hours < 48 ? 'resets in ' + hours + 'h ' + (m % 60) + 'm' : 'resets in ' + Math.round(hours / 24) + 'd'
 }
 
 export const toUsage = (u: { context: { tokens?: number; window: number; percent?: number }; rateLimits: { kind: string; percentUsed: number; resetsAt?: string }[]; cost?: { usd: number } }): Usage => ({
