@@ -1,0 +1,76 @@
+# Claude Code side mods
+
+Three Claude Code mods that keep the chat on the left and show, on the right, what Claude and each of its agents is doing while it works.
+
+Author: Hilmi, https://master-hilmi.vercel.app/
+
+## What you get
+
+`/mod-on` opens the right side. `/mod-off` closes it again.
+
+**Mission Control** is a live pane with five sections:
+
+- **Plan**: one row per plan bar, with a fill meter, the percentage, the current step and a step count.
+- **Agents**: Claude and every agent it spawns, each with its state (running, done, needs you, failed), a sliding bar and a timer. Click an agent's row and a panel opens at the bottom, above the prompt. It shows what that agent is doing (its tool calls, what it says, how it ended) and has an `@agent` field. Type a message there and press Enter to send it to the agent, as `@agent` does in Claude Code. A finished agent resumes with your message.
+- **Usage**: the figures `/usage` shows, kept live: the 5-hour and weekly limits with their reset times, context fill and session cost.
+- **Now** and **Activity**: what each agent is running at this moment, and a feed of recent tool calls.
+
+**plan-progress** draws the plan bars that Mission Control reads. Claude fills them through its `plan_progress` tool, and a "Tasks" bar fills by itself from Claude's own task list.
+
+**omnigraph-viz** draws the session as a graph: Claude in the centre, each agent linked to whoever spawned it, and every tool call and file it touched. If you use the [omnigraph](https://github.com/pronskiy/omnigraph-claude-mod) CLI against a graph store, it draws that graph as the original mod does.
+
+## Install
+
+At the prompt of a Claude Code terminal session, install the three mods:
+
+```
+/plugin install mission-control --marketplace masterA88/claude-side-mods
+/plugin install plan-progress --marketplace masterA88/claude-side-mods
+/plugin install omnigraph-viz --marketplace masterA88/claude-side-mods
+```
+
+Answer `y` to add the marketplace, then pick a scope (user scope loads them in every session). Then type `/mod-on`.
+
+From a shell:
+
+```
+claude plugin install mission-control --marketplace masterA88/claude-side-mods
+claude plugin install plan-progress --marketplace masterA88/claude-side-mods
+claude plugin install omnigraph-viz --marketplace masterA88/claude-side-mods
+```
+
+In the desktop app, where `/plugin` does not run: click + next to the prompt box, then Plugins, Add marketplace with `masterA88/claude-side-mods`, then Add plugin for each of the three.
+
+The right pane opens unasked only when the terminal is wide enough (from about 144 columns), so give the window room or open it with `/mc`.
+
+## Commands
+
+| Command | Mod | What it does |
+|---|---|---|
+| `/mod-on`, `/mod-off` | mission-control | Turn the right side on or off for all three mods |
+| `/mc` | mission-control | Show or hide the Mission Control pane |
+| `/progress`, `/progress-on`, `/progress-off` | plan-progress | Show or hide the bars, or the separate Plan pane |
+| `/progress-clear`, `/progress-agents` | plan-progress | Clear all bars; fold or show the agent strips |
+| `/plan-progress-autoclose`, `/plan-progress-settings` | plan-progress | Let finished bars leave on their own; open the settings |
+| `/og-on`, `/og-off` | omnigraph-viz | Open or close the graph pane |
+
+The three mods share one switch, `~/.claude/side-mods/mods-on.json`, which `/mod-on` and `/mod-off` write. Each mod watches it, because one mod cannot run another mod's command.
+
+## Credits
+
+Two of the three mods are forks of other people's work, and Mission Control borrows ideas from both. Each fork keeps its original MIT license and copyright notice in its folder.
+
+- **plan-progress** is a fork of the plan-progress mod in [zycck/claude-mods](https://github.com/zycck/claude-mods) by Kirill Serditov (MIT, `plugins/plan-progress/LICENSE`). The bars, the pixel fill, the agent strips, the sounds and the `plan_progress` tool are his. This fork moves the bars into a pane on the right, puts them under the shared `/mod-on` switch, and fills a bar from Claude's own task list.
+- **omnigraph-viz** is a fork of [pronskiy/omnigraph-claude-mod](https://github.com/pronskiy/omnigraph-claude-mod) by Roman Pronskiy (MIT, `plugins/omnigraph-viz/LICENSE`). The graph drawing, the layout and the omnigraph command handling are his. This fork adds `/og-on` and `/og-off`, the shared switch, and a graph of the session's own activity for use without an omnigraph store.
+- **mission-control** is new code by Hilmi (MIT, `plugins/mission-control/LICENSE`). Its Plan section reads plan-progress's bars and does not copy its code.
+- The always-on companion in the original setup is Anthropic's built-in "You should know" plugin (`/plugin enable cc-plugin-you-should-know@builtin`). It is not part of this repository.
+- The mods are built on the Claude Code mod API (`ui.render`, panes, the band above the prompt, `$.session.send`) by Anthropic.
+
+## Known issues
+
+- 46 of omnigraph-viz's 269 original tests fail. They assume the mod records only `omnigraph` commands, and this fork also records the session's own activity in every session. Mission Control's 10 tests pass.
+- Agents usually finish in seconds, so there is little time to click one while it runs. You can still open the panel on a finished agent and message it.
+
+## License
+
+MIT. `LICENSE` at the top covers Mission Control and the changes made in the forks. Each fork's own `LICENSE` covers its original code.

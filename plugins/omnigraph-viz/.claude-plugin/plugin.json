@@ -1,0 +1,52 @@
+{
+  "name": "omnigraph-viz",
+  "version": "0.1.0-side.1",
+  "description": "Fork of pronskiy/omnigraph-viz with /og-on and /og-off for /mod-on",
+  "author": {
+    "name": "Roman Pronskiy",
+    "url": "https://github.com/pronskiy"
+  },
+  "homepage": "https://github.com/pronskiy/omnigraph-claude-mod",
+  "repository": "https://github.com/pronskiy/omnigraph-claude-mod",
+  "license": "MIT",
+  "keywords": [
+    "omnigraph",
+    "graph",
+    "visualization",
+    "terminal",
+    "demo"
+  ],
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "omnigraphBin": {
+      "type": "string",
+      "default": "omnigraph",
+      "title": "omnigraph binary",
+      "description": "Name or absolute path of the omnigraph CLI"
+    },
+    "maxGhostNodes": {
+      "type": "number",
+      "default": 2000,
+      "title": "Max ghost nodes",
+      "description": "Largest graph loaded whole; a bigger one keeps its best-connected nodes"
+    },
+    "ledgerDir": {
+      "type": "string",
+      "default": ".omnigraph-viz",
+      "title": "Ledger directory",
+      "description": "Where session ledgers are written, relative to the session directory"
+    },
+    "enrich": {
+      "type": "boolean",
+      "default": true,
+      "title": "Enrich",
+      "description": "Run omnigraph --json calls in the background for graph detail"
+    },
+    "debug": {
+      "type": "boolean",
+      "default": false,
+      "title": "Debug",
+      "description": "Log viz errors as dim transcript lines"
+    }
+  }
+}

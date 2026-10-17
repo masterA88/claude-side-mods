@@ -1,0 +1,13 @@
+{
+  "name": "mission-control",
+  "version": "0.1.0",
+  "description": "A pane on the right showing what Claude and every agent is doing, plus /mod-on and /mod-off for the side mods",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "Hilmi",
+    "url": "https://master-hilmi.vercel.app/"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/masterA88/claude-side-mods",
+  "repository": "https://github.com/masterA88/claude-side-mods"
+}
