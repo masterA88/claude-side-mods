@@ -147,7 +147,7 @@ function setRow($: EngineInterface, id: string, change: (row: Row) => Row) {
   return update($, rows, list => list.map(r => (r.id === id ? change(r) : r)))
 }
 
-function trail($: EngineInterface, agentId: string, line: TrailLine) {
+function addTrail($: EngineInterface, agentId: string, line: TrailLine) {
   return update($, trails, all => ({ ...all, [agentId]: [...(all[agentId] ?? []), line].slice(-120) }))
 }
 
@@ -156,7 +156,7 @@ async function message($: EngineInterface, agentId: string, text: string) {
   const body = text.trim()
   if (!body) return
   const now = await $.clock.now()
-  await trail($, agentId, { at: now, kind: 'you', text: body })
+  await addTrail($, agentId, { at: now, kind: 'you', text: body })
   let reason: string | null = null
   try {
     const sent = await $.session.send({ to: { agentId }, text: body })
@@ -164,7 +164,7 @@ async function message($: EngineInterface, agentId: string, text: string) {
   } catch (err) {
     reason = String(err)
   }
-  if (reason !== null) await trail($, agentId, { at: await $.clock.now(), kind: 'error', text: 'not delivered: ' + reason })
+  if (reason !== null) await addTrail($, agentId, { at: await $.clock.now(), kind: 'error', text: 'not delivered: ' + reason })
   else await setRow($, agentId, r => (r.state === 'running' ? r : { ...r, state: 'running', endedAt: null, tool: 'reading your message' }))
   await animate($)
 }
@@ -331,7 +331,7 @@ export const register: Register = on => {
     const now = await $.clock.now()
     const state: RowState = e.reason === 'error' || e.reason === 'refusal' ? 'failed' : 'done'
     await setRow($, agentId ?? MAIN, r => ({ ...r, state, endedAt: now, tool: e.reason === 'aborted' ? 'stopped' : '' }))
-    if (agentId) await trail($, agentId, { at: now, kind: 'end', text: e.reason === 'answer' ? 'finished' : e.reason })
+    if (agentId) await addTrail($, agentId, { at: now, kind: 'end', text: e.reason === 'answer' ? 'finished' : e.reason })
     await syncAgents($)
     await animate($)
 
@@ -341,7 +341,7 @@ export const register: Register = on => {
   // what an agent says between its tool calls, for its panel
   on('turn.step', async function* ($, e, next) {
     const step = yield* next(e)
-    if (e.agentId && step?.answer.trim()) await trail($, e.agentId, { at: await $.clock.now(), kind: 'say', text: step.answer.trim() })
+    if (e.agentId && step?.answer.trim()) await addTrail($, e.agentId, { at: await $.clock.now(), kind: 'say', text: step.answer.trim() })
 
     return step
   })
@@ -375,7 +375,7 @@ export const register: Register = on => {
     await log($, { at: now, who: names.get(started.agentId) ?? 'agent', tool: 'spawned', detail: title, isError: false })
     // a resume by the engine for a finished background task is not something you typed
     const isTaskNote = e.prompt.trimStart().startsWith('<task-notification>')
-    await trail($, started.agentId, isTaskNote ? { at: now, kind: 'end', text: 'background task finished' } : { at: now, kind: 'you', text: e.prompt })
+    await addTrail($, started.agentId, isTaskNote ? { at: now, kind: 'end', text: 'background task finished' } : { at: now, kind: 'you', text: e.prompt })
     await animate($)
 
     return started
@@ -398,7 +398,7 @@ export const register: Register = on => {
     const isError = ran.deny !== undefined || ran.isError === true
     await setRow($, id, r => (r.state === 'needs' || r.state === 'running' ? { ...r, state: r.endedAt ? r.state : 'running' } : r))
     await log($, { at: now, who: who(e.agentId), tool: e.tool, detail, isError })
-    if (e.agentId) await trail($, e.agentId, { at: now, kind: isError ? 'error' : 'tool', text: detail ? `${e.tool} ${detail}` : e.tool })
+    if (e.agentId) await addTrail($, e.agentId, { at: now, kind: isError ? 'error' : 'tool', text: detail ? `${e.tool} ${detail}` : e.tool })
     if (!e.agentId) await syncAgents($)
 
     return ran
