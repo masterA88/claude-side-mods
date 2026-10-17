@@ -1,13 +1,13 @@
 {
-  "name": "omnigraph-viz",
-  "version": "0.1.0-side.1",
-  "description": "Fork of pronskiy/omnigraph-viz with /og-on and /og-off for /mod-on",
+  "name": "side-omnigraph-viz",
+  "version": "0.1.0-side.2",
+  "description": "Draws your Claude Code session as a live graph of Claude, its agents, tools and files; hands over to an omnigraph store when you use one. Fork of pronskiy/omnigraph-claude-mod (MIT).",
   "author": {
-    "name": "Roman Pronskiy",
-    "url": "https://github.com/pronskiy"
+    "name": "Hilmi",
+    "url": "https://master-hilmi.vercel.app/"
   },
-  "homepage": "https://github.com/pronskiy/omnigraph-claude-mod",
-  "repository": "https://github.com/pronskiy/omnigraph-claude-mod",
+  "homepage": "https://github.com/masterA88/claude-side-mods",
+  "repository": "https://github.com/masterA88/claude-side-mods",
   "license": "MIT",
   "keywords": [
     "omnigraph",

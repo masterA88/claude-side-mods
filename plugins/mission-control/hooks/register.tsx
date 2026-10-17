@@ -18,7 +18,7 @@ const trails = atom({ plugin: 'mission-control', key: 'trails' } as const, {} as
 // the plan bars belong to the plan-progress mod (its plan_progress tool writes them); this pane only reads them
 type PlanStep = { title: string; status: string }
 type Plan = { id: string; title: string; state: string; stages: { name: string; steps: PlanStep[] }[]; note: string | null }
-const PLANS = { plugin: 'plan-progress', key: 'plans' } as const
+const PLANS = { plugin: 'side-plan-progress', key: 'plans' } as const
 const AUTO_AGENTS = 'agents:auto' // plan-progress's own bar for spawned agents, which the board already shows
 
 async function readPlans($: EngineInterface): Promise<Plan[]> {

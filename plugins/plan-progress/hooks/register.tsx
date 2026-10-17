@@ -3,14 +3,14 @@ import type { AgentStatus, EngineInterface, Register, TurnStepChunk } from 'clau
 
 import type { AgentRun, Plan, PlanStage, PlanState, PlanStep, Prefs, Speed, StepStatus, VersionState } from '../types'
 
-const TOOL = 'mcp__plan-progress__plan_progress'
-const plans = atom({ plugin: 'plan-progress', key: 'plans' } as const, [])
+const TOOL = 'mcp__side-plan-progress__plan_progress'
+const plans = atom({ plugin: 'side-plan-progress', key: 'plans' } as const, [])
 const MAX_BARS = 3
 // a space as wide as a digit, so '  0%' and '100%' take the same room
 const FIGURE_SPACE = String.fromCharCode(0x2007)
-const isOpen = atom({ plugin: 'plan-progress', key: 'isOpen' } as const, true)
+const isOpen = atom({ plugin: 'side-plan-progress', key: 'isOpen' } as const, true)
 // fork: the bars live in a pane on the right instead of the band above the prompt, shown while switched on
-const modsOn = atom({ plugin: 'plan-progress', key: 'modsOn' } as const, false)
+const modsOn = atom({ plugin: 'side-plan-progress', key: 'modsOn' } as const, false)
 const BAR_PANE = 'plan-progress'
 
 // the one switch /mod-on and /mod-off flip: a file every side mod watches, so no mod has to run another's command
@@ -34,10 +34,10 @@ async function followMods($: EngineInterface) {
   // Mission Control draws the bars now, so the switch no longer opens a tab of its own (/progress-on still does)
   await $.ui.close({ id: BAR_PANE })
 }
-const tick = atom({ plugin: 'plan-progress', key: 'tick' } as const, 0)
-const speed = atom({ plugin: 'plan-progress', key: 'speed' } as const, { rate: null, isLive: false } as Speed)
+const tick = atom({ plugin: 'side-plan-progress', key: 'tick' } as const, 0)
+const speed = atom({ plugin: 'side-plan-progress', key: 'speed' } as const, { rate: null, isLive: false } as Speed)
 // the settings window's choices as the session holds them (null until the session starts)
-const prefs = atom({ plugin: 'plan-progress', key: 'prefs' } as const, null as Prefs | null)
+const prefs = atom({ plugin: 'side-plan-progress', key: 'prefs' } as const, null as Prefs | null)
 const STRIP_H = 16
 const STRIP_GAP = 2
 // rows of strips per bar, the "+N more" row included: the band above the prompt has room for about 300 px
@@ -2562,7 +2562,7 @@ async function setOption($: EngineInterface, field: 'twinkle' | 'doneBarSeconds'
   try {
     const once = () =>
       Promise.resolve()
-        .then(() => $.config.set({ key: `plan-progress.${field}`, value }))
+        .then(() => $.config.set({ key: `side-plan-progress.${field}`, value }))
         .catch((err: unknown) => ({ deny: String(err) }))
     let set = await once()
     // the engine reads a plugin's /config rows off its list of loaded plugins, which a reload of that list (the plugin
@@ -2579,12 +2579,12 @@ async function setOption($: EngineInterface, field: 'twinkle' | 'doneBarSeconds'
 }
 
 // the version row: the mod's own version, and on a press the newest published release of it. The marketplace repo holds
-// several mods, so a release is ours by its tag (plan-progress-v1.2.3); drafts and pre-releases are not offered.
+// several mods, so a release is ours by its tag (side-plan-progress-v1.2.3); drafts and pre-releases are not offered.
 // PLAN_PROGRESS_RELEASES_URL points the check elsewhere (a local stand-in for GitHub while the update is developed)
-const RELEASES = 'https://api.github.com/repos/zycck/claude-mods/releases?per_page=100'
-const RELEASE_TAG = 'plan-progress-v'
+const RELEASES = 'https://api.github.com/repos/masterA88/claude-side-mods/releases?per_page=100'
+const RELEASE_TAG = 'side-plan-progress-v'
 // where a check or an update stands, in $.state: the window draws it, and it outlives the reload an update ends with
-const versionState = atom({ plugin: 'plan-progress', key: 'version' } as const, { phase: 'idle' } as VersionState)
+const versionState = atom({ plugin: 'side-plan-progress', key: 'version' } as const, { phase: 'idle' } as VersionState)
 // how this copy is installed: its version, and the marketplace it came from, or none for a folder (--plugin-dir, a dev
 // mod), which updates with its folder and not through `claude plugin update`
 type Install = { version: string; market: string | null }

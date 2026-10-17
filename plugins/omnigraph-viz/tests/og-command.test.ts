@@ -18,7 +18,7 @@ describe('/og', () => {
   test('the pane waits for operations', async ($, on) => {
     world(on)
     await $.session.start(START)
-    const ui = await $.ui.mount({ plugin: 'omnigraph-viz', surface: 'terminal', component: 'Pane', requestId: 'omnigraph', props: paneProps() })
+    const ui = await $.ui.mount({ plugin: 'side-omnigraph-viz', surface: 'terminal', component: 'Pane', requestId: 'omnigraph', props: paneProps() })
     expect(await ui.find({ type: 'Text', text: /Waiting for omnigraph operations/ })).toBeDefined()
     await ui.unmount()
   })

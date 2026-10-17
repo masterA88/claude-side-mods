@@ -2,7 +2,7 @@ import { describe, expect, test } from 'claude-code/testing'
 
 import { START, bashAnswer, feedLines, paneProps, world } from './world'
 
-const PANE = { plugin: 'omnigraph-viz', surface: 'terminal', component: 'Pane', requestId: 'omnigraph' } as const
+const PANE = { plugin: 'side-omnigraph-viz', surface: 'terminal', component: 'Pane', requestId: 'omnigraph' } as const
 
 // fork: without an omnigraph store the pane draws the session's own activity; a store, once used, takes over
 describe('activity graph', () => {

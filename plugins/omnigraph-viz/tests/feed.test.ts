@@ -3,7 +3,7 @@ import { describe, expect, test } from 'claude-code/testing'
 import { START, bashAnswer, feedLines, paneProps, world } from './world'
 
 const RUN = { origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 200 } } as const
-const PANE = { plugin: 'omnigraph-viz', surface: 'terminal', component: 'Pane', requestId: 'omnigraph' } as const
+const PANE = { plugin: 'side-omnigraph-viz', surface: 'terminal', component: 'Pane', requestId: 'omnigraph' } as const
 
 describe('feed', () => {
   test('shows ops; selecting one shows its command and output', async ($, on) => {

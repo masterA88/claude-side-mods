@@ -141,7 +141,7 @@ export type ViewState = {
 
 declare module 'claude-code' {
   interface PluginState {
-    'omnigraph-viz': {
+    'side-omnigraph-viz': {
       ui: UiState
       view: ViewState
       ledgerPath: string | null

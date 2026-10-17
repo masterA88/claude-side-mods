@@ -1,10 +1,27 @@
 {
   "name": "side-mods",
-  "owner": { "name": "Hilmi", "url": "https://master-hilmi.vercel.app/" },
-  "metadata": { "description": "Claude Code side mods: chat on the left, what Claude and its agents are doing on the right" },
+  "owner": {
+    "name": "Hilmi",
+    "url": "https://master-hilmi.vercel.app/"
+  },
+  "metadata": {
+    "description": "Claude Code side mods: chat on the left, what Claude and its agents are doing on the right"
+  },
   "plugins": [
-    { "name": "mission-control", "source": "./plugins/mission-control", "description": "Live pane of Claude and every agent: plan, agents with a click-to-open panel you can message, usage, activity. Owns /mod-on and /mod-off." },
-    { "name": "plan-progress", "source": "./plugins/plan-progress", "description": "Fork of zycck/claude-mods plan-progress: live plan bars, read by Mission Control" },
-    { "name": "omnigraph-viz", "source": "./plugins/omnigraph-viz", "description": "Fork of pronskiy/omnigraph-claude-mod: graphs the session's own activity when no omnigraph store is in use" }
+    {
+      "name": "mission-control",
+      "source": "./plugins/mission-control",
+      "description": "Live pane of Claude and every agent: plan, agents with a click-to-open panel you can message, usage, activity. Owns /mod-on and /mod-off."
+    },
+    {
+      "name": "side-plan-progress",
+      "source": "./plugins/plan-progress",
+      "description": "Live plan progress bars, shown in Mission Control. Fork of zycck/claude-mods plan-progress (MIT)."
+    },
+    {
+      "name": "side-omnigraph-viz",
+      "source": "./plugins/omnigraph-viz",
+      "description": "Your session as a live graph of Claude, agents, tools and files. Fork of pronskiy/omnigraph-claude-mod (MIT)."
+    }
   ]
 }

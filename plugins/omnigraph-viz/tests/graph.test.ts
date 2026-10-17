@@ -8,7 +8,7 @@ import { START, T0, bashAnswer, exploreView, feedLines, paneProps, world } from 
 import type { Processes } from './world'
 
 const LEDGER = '/work/.omnigraph-viz/20261006-120000-000.jsonl'
-const PANE = { plugin: 'omnigraph-viz', surface: 'terminal', component: 'Pane', requestId: 'omnigraph' } as const
+const PANE = { plugin: 'side-omnigraph-viz', surface: 'terminal', component: 'Pane', requestId: 'omnigraph' } as const
 const READ = '1 rows from branch main via ready\nslug         | title\n-------------+---------------------\niss-auth-mfa | Add TOTP MFA to auth\n'
 const WRITE = 'changed main via create_issue: 1 nodes, 1 edges\n'
 

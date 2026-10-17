@@ -1,10 +1,10 @@
 {
-  "name": "plan-progress",
-  "version": "1.0.0-side.1",
-  "description": "Fork of zycck/claude-mods plan-progress: live plan bars in a pane on the right, switched by /mod-on",
+  "name": "side-plan-progress",
+  "version": "1.0.0-side.2",
+  "description": "Live plan progress bars that fill as Claude works, shown in Mission Control. Fork of zycck/claude-mods plan-progress (MIT).",
   "author": {
-    "name": "Kirill Serditov",
-    "url": "https://github.com/zycck"
+    "name": "Hilmi",
+    "url": "https://master-hilmi.vercel.app/"
   },
   "license": "MIT",
   "userConfig": {
@@ -22,5 +22,7 @@
       "default": true
     }
   },
-  "types": "./types/index.d.ts"
+  "types": "./types/index.d.ts",
+  "homepage": "https://github.com/masterA88/claude-side-mods",
+  "repository": "https://github.com/masterA88/claude-side-mods"
 }

@@ -8,7 +8,7 @@ import type { LedgerLine, OpIntent } from '../types'
 import { END, START, bashAnswer, exploreView, feedLines, paneProps, world } from './world'
 import type { World } from './world'
 
-const PANE = { plugin: 'omnigraph-viz', surface: 'terminal', component: 'Pane', requestId: 'omnigraph' } as const
+const PANE = { plugin: 'side-omnigraph-viz', surface: 'terminal', component: 'Pane', requestId: 'omnigraph' } as const
 const RUN = { origin: { kind: 'composer' }, presentation: { isFullscreen: true, columns: 200 } } as const
 const LIVE_LEDGER = '/work/.omnigraph-viz/20261006-120000-000.jsonl'
 const DEV = foldExport(EXPORT_JSONL, parseEdgeEnds(SCHEMA_SOURCE), 2000)

@@ -81,9 +81,9 @@ interface Replay extends Show {
 }
 
 // $.state: small, survives hot reload, redraws its readers. Declared here so the validator can see them.
-const uiAtom = atom({ plugin: 'omnigraph-viz', key: 'ui' } as const, INITIAL_UI)
-const viewAtom = atom({ plugin: 'omnigraph-viz', key: 'view' } as const, INITIAL_VIEW)
-const ledgerPathAtom = atom({ plugin: 'omnigraph-viz', key: 'ledgerPath' } as const, null)
+const uiAtom = atom({ plugin: 'side-omnigraph-viz', key: 'ui' } as const, INITIAL_UI)
+const viewAtom = atom({ plugin: 'side-omnigraph-viz', key: 'view' } as const, INITIAL_VIEW)
+const ledgerPathAtom = atom({ plugin: 'side-omnigraph-viz', key: 'ledgerPath' } as const, null)
 
 // Module memory: rebuilt from the ledger on every (re)load.
 let config: Config = { bin: 'omnigraph', ledgerDir: '.omnigraph-viz', maxGhostNodes: 2000, isEnriching: true, isDebug: false }

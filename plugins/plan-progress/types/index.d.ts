@@ -54,7 +54,7 @@ export type VersionState =
 
 declare module 'claude-code' {
   interface PluginState {
-    'plan-progress': {
+    'side-plan-progress': {
       plans: Plan[]
       isOpen: boolean
       // fork: the side pane is drawn only while /mod-on (or /progress-on) has switched it on
