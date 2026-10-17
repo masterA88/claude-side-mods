@@ -4,6 +4,10 @@ Three Claude Code mods that keep the chat on the left and show, on the right, wh
 
 Author: Hilmi, https://master-hilmi.vercel.app/
 
+![Mission Control and omnigraph on the right while three agents run](media/demo.gif)
+
+The clip runs 36 seconds. [Full-size MP4](media/demo.mp4).
+
 ## What you get
 
 `/mod-on` opens the right side. `/mod-off` closes it again.
@@ -17,7 +21,7 @@ Author: Hilmi, https://master-hilmi.vercel.app/
 
 **plan-progress** draws the plan bars that Mission Control reads. Claude fills them through its `plan_progress` tool, and a "Tasks" bar fills by itself from Claude's own task list.
 
-**omnigraph-viz** draws the session as a graph: Claude in the centre, each agent linked to whoever spawned it, and every tool call and file it touched. If you use the [omnigraph](https://github.com/pronskiy/omnigraph-claude-mod) CLI against a graph store, it draws that graph as the original mod does.
+**omnigraph-viz** draws the session as a graph: Claude in the centre, each agent linked to whoever spawned it, and every tool call and file it touched. This activity graph lives in memory only and writes no files. If you run the `omnigraph` CLI against a graph store, the first `omnigraph` command hands the pane to that store's graph and the mod then behaves as [the original](https://github.com/pronskiy/omnigraph-claude-mod) does, with its ledger in `.omnigraph-viz/` in your project and its op count on the status line.
 
 ## Install
 
@@ -66,10 +70,16 @@ Two of the three mods are forks of other people's work, and Mission Control borr
 - The always-on companion in the original setup is Anthropic's built-in "You should know" plugin (`/plugin enable cc-plugin-you-should-know@builtin`). It is not part of this repository.
 - The mods are built on the Claude Code mod API (`ui.render`, panes, the band above the prompt, `$.session.send`) by Anthropic.
 
-## Known issues
+## Requirements and known limits
 
-- 46 of omnigraph-viz's 269 original tests fail. They assume the mod records only `omnigraph` commands, and this fork also records the session's own activity in every session. Mission Control's 10 tests pass.
-- Agents usually finish in seconds, so there is little time to click one while it runs. You can still open the panel on a finished agent and message it.
+- Built and tested on Claude Code 2.1.302, the version that ships the mod API these use. Older versions may not load them.
+- The panes are made for the terminal. Mission Control's agent panel is also tested on the desktop app's surface. omnigraph's graph is drawn only in the terminal, as upstream.
+- The disk row uses `df` and `hostname`, so it appears on macOS and Linux and is left out on Windows.
+- Mission Control's Plan section reads plan-progress's bars, so it stays empty if plan-progress is not installed. Everything else works on its own.
+- Agents usually finish in seconds, so there is little time to click one while it runs. You can still open the panel on a finished agent and message it, which resumes it.
+- The activity graph starts over if the mods are reloaded mid-session.
+
+Tests: Mission Control 11 of 11 and omnigraph-viz 271 of 271 (`claude plugin test plugins/<mod>`). The plan-progress fork carries no tests of its own.
 
 ## License
 

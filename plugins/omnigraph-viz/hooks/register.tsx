@@ -103,16 +103,24 @@ let resolvedBin: string | undefined
 /** HOME, read once: `null` until then. */
 let homeCache: string | undefined | null = null
 
-// fork: the session's own activity, drawn as a graph while no omnigraph store is in play
+// fork: the session's own activity, drawn as a graph while no omnigraph store is in play.
+// It is a Session of its own with no ledger, so it never takes the store graph's place and writes no files.
 const agentLabels = new Map<string, string>()
 const callStarts = new Map<string, { at: number; detail: string }>()
+let activity: Session | undefined
 
-async function ensureActivity($: EngineInterface, s: Session): Promise<void> {
-  if (s.viz.ghost) return
-  const now = await $.clock.now()
-  await ensureLedger($, s, now)
-  apply($, s, graphLine(now, s.cwd))
-  graphState = 'ready'
+async function ensureActivity($: EngineInterface): Promise<Session> {
+  if (activity) return activity
+  const cwd = session?.cwd ?? (await $.session.cwd())
+  const a: Session = { cwd, ledger: undefined, viz: emptyViz(), scene: new Scene() }
+  activity = a
+  apply($, a, graphLine(await $.clock.now(), cwd))
+  return a
+}
+
+/** An omnigraph op made the session's ledger: from then on the store's graph is the one shown. */
+function isStoreLive(): boolean {
+  return session?.ledger !== undefined
 }
 
 function whoIs(agentId: string | undefined): string {
@@ -132,7 +140,7 @@ function debug($: EngineInterface, err: unknown): void {
 
 /** The pane shows the replay while one is on, else the live session. */
 function shown(): Show | undefined {
-  return replay ?? session
+  return replay ?? (isStoreLive() || !activity ? session : activity)
 }
 
 /** The one path every line takes, live or replayed: the reducer, then the scene. */
@@ -159,11 +167,14 @@ async function publish($: EngineInterface): Promise<void> {
         progress: r.player.progress,
         isDone: r.player.isDone,
       })
-    : session
-      ? toView(session.viz, graphState, graphMessage)
-      : INITIAL_VIEW
+    : activity && !isStoreLive()
+      ? toView(activity.viz, 'ready', null)
+      : session
+        ? toView(session.viz, graphState, graphMessage)
+        : INITIAL_VIEW
   await update($, viewAtom, () => view)
-  $.ui.status(lastMods && view.counters.ops > 0 && !session?.isEnded ? statusText(view) : undefined)
+  // as upstream: the status line counts omnigraph ops (live or replayed), never the activity graph's calls
+  $.ui.status((r || isStoreLive()) && view.counters.ops > 0 && !session?.isEnded ? statusText(view) : undefined)
 }
 
 /** On the first op: the ledger file, a `.gitignore` beside it, and the session line. */
@@ -496,7 +507,7 @@ async function startReplay($: EngineInterface, path: string, speed: number): Pro
 export const register: Register = (on, options) => {
   config = {
     bin: typeof options.omnigraphBin === 'string' ? options.omnigraphBin : 'omnigraph',
-    ledgerDir: typeof options.ledgerDir === 'string' && options.ledgerDir !== '.omnigraph-viz' ? options.ledgerDir : '',
+    ledgerDir: typeof options.ledgerDir === 'string' ? options.ledgerDir : '.omnigraph-viz',
     maxGhostNodes: typeof options.maxGhostNodes === 'number' ? options.maxGhostNodes : 2000,
     isEnriching: options.enrich !== false,
     isDebug: options.debug === true,
@@ -519,10 +530,7 @@ export const register: Register = (on, options) => {
       graphState = 'none'
       graphMessage = null
       graphKey = null
-      // fork: ledgers go under ~/.claude, not into the project the session runs in
-      if (!config.ledgerDir) config.ledgerDir = `${(await $.env.get('HOME')) ?? '~'}/.claude/omnigraph-viz-ledgers`
       session = await openSession($, e.cwd)
-      await ensureActivity($, session)
       await publish($)
     } catch (err) {
       debug($, err)
@@ -570,6 +578,7 @@ export const register: Register = (on, options) => {
         // The Feed starts over; the graph stays, so the Graph tab keeps working.
         session.viz = { ...emptyViz(), ghost: session.viz.ghost }
       }
+      activity = undefined
       await publish($)
       return { text: 'Omnigraph viz cleared.' }
     }
@@ -606,27 +615,29 @@ export const register: Register = (on, options) => {
   on('tool.call', async ($, e, next) => {
     const s = session
     const input = e as unknown as Record<string, unknown>
-    const isOmnigraph = e.tool === 'Bash' && /omnigraph/.test(String(input.command ?? ''))
-    if (!s || isOmnigraph) return next(e)
+    const isOmnigraph = e.tool === 'Bash' && findInvocations(String(input.command ?? ''), '/', config.bin).length > 0
+    if (!s || isOmnigraph || isStoreLive()) return next(e)
     const id = e.tool_use_id ?? `call-${await $.clock.now()}`
     const detail = detailOf(input)
+    let a: Session | undefined
     try {
-      await ensureActivity($, s)
+      a = await ensureActivity($)
       const at = await $.clock.now()
       callStarts.set(id, { at, detail })
-      apply($, s, startLine(at, id, e.tool, whoIs(e.agentId), detail, s.cwd, e.agentId))
+      apply($, a, startLine(at, id, e.tool, whoIs(e.agentId), detail, s.cwd, e.agentId))
       await publish($)
     } catch (err) {
       debug($, err)
     }
     const r = await next(e)
+    if (!a) return r
     try {
       const at = await $.clock.now()
       const start = callStarts.get(id)
       callStarts.delete(id)
       const isError = r.deny !== undefined || r.isError === true
-      apply($, s, endLine(at, id, start?.at ?? at, isError, detail))
-      apply($, s, callDiff(at, id, e.tool, e.agentId, fileOf(e.tool, input)))
+      apply($, a, endLine(at, id, start?.at ?? at, isError, detail))
+      apply($, a, callDiff(at, id, e.tool, e.agentId, fileOf(e.tool, input)))
       await publish($)
     } catch (err) {
       debug($, err)
@@ -640,9 +651,9 @@ export const register: Register = (on, options) => {
     if (!s || !('agentId' in started) || !started.agentId) return started
     try {
       agentLabels.set(started.agentId, e.subagentType || 'agent')
-      await ensureActivity($, s)
+      const a = await ensureActivity($)
       const label = `${e.subagentType || 'agent'}: ${e.description || ''}`
-      apply($, s, spawnDiff(await $.clock.now(), `spawn-${started.agentId}`, started.agentId, label, e.parentAgentId))
+      apply($, a, spawnDiff(await $.clock.now(), `spawn-${started.agentId}`, started.agentId, label, e.parentAgentId))
       await publish($)
     } catch (err) {
       debug($, err)

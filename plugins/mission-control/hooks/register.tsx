@@ -367,7 +367,9 @@ export const register: Register = on => {
       return kept
     })
     await log($, { at: now, who: names.get(started.agentId) ?? 'agent', tool: 'spawned', detail: title, isError: false })
-    await trail($, started.agentId, { at: now, kind: 'you', text: e.prompt })
+    // a resume by the engine for a finished background task is not something you typed
+    const isTaskNote = e.prompt.trimStart().startsWith('<task-notification>')
+    await trail($, started.agentId, isTaskNote ? { at: now, kind: 'end', text: 'background task finished' } : { at: now, kind: 'you', text: e.prompt })
     await animate($)
 
     return started

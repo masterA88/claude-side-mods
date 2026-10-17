@@ -37,3 +37,17 @@ test('clicking an agent opens its panel at the bottom, and a message there reach
     await pane.unmount()
   }
 })
+
+test('a resume for a finished background task is not shown as your message', async ($, on) => {
+  mock.clock(on)
+  on('agent.spawn', async () => ({ model: 'claude-haiku-5-5', agentId: 'a2' }))
+  on('ui.render', async ($, e) => h($.ui.resolve(e).Box, { key: 'engine' }) as never)
+  await $.agent.spawn({ ...SPAWN, prompt: '<task-notification><task-id>x</task-id></task-notification>' } as never)
+  const pane = await $.ui.mount({ plugin: 'mission-control', surface: 'terminal', ...PANE } as never)
+  await pane.press({ key: 'a2' })
+  const band = await $.ui.mount({ plugin: 'mission-control', surface: 'terminal', ...BAND } as never)
+  expect(await band.find({ type: 'Text', text: /background task finished/ })).toBeDefined()
+  expect(await band.find({ type: 'Text', text: /task-notification/ })).toBeUndefined()
+  await band.unmount()
+  await pane.unmount()
+})
