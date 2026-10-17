@@ -1,6 +1,6 @@
 {
   "name": "mission-control",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A pane on the right showing what Claude and every agent is doing, plus /mod-on and /mod-off for the side mods",
   "types": "./types/index.d.ts",
   "author": {
@@ -9,5 +9,6 @@
   },
   "license": "MIT",
   "homepage": "https://github.com/masterA88/claude-side-mods",
-  "repository": "https://github.com/masterA88/claude-side-mods"
+  "repository": "https://github.com/masterA88/claude-side-mods",
+  "icon": "./.claude-plugin/icon.png"
 }

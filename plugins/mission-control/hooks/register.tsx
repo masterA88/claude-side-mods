@@ -97,9 +97,9 @@ export const resetIn = (iso: string | null, now: number) => {
   if (Number.isNaN(ms)) return ''
   if (ms <= 0) return 'resets now'
   const m = Math.round(ms / 60_000)
-  if (m < 60) return `resets in ${m}m`
+  if (m < 60) return 'resets in ' + m + 'm'
   const h = Math.floor(m / 60)
-  return h < 48 ? `resets in ${h}h ${m % 60}m` : `resets in ${Math.round(h / 24)}d`
+  return h < 48 ? 'resets in ' + h + 'h ' + (m % 60) + 'm' : 'resets in ' + Math.round(h / 24) + 'd'
 }
 
 export const toUsage = (u: { context: { tokens?: number; window: number; percent?: number }; rateLimits: { kind: string; percentUsed: number; resetsAt?: string }[]; cost?: { usd: number } }): Usage => ({
@@ -157,8 +157,14 @@ async function message($: EngineInterface, agentId: string, text: string) {
   if (!body) return
   const now = await $.clock.now()
   await trail($, agentId, { at: now, kind: 'you', text: body })
-  const sent = await $.session.send({ to: { agentId }, text: body }).catch((err: unknown) => ({ isDelivered: false as const, reason: String(err) }))
-  if (!sent.isDelivered) await trail($, agentId, { at: await $.clock.now(), kind: 'error', text: `not delivered: ${sent.reason}` })
+  let reason: string | null = null
+  try {
+    const sent = await $.session.send({ to: { agentId }, text: body })
+    if (!sent.isDelivered) reason = String(sent.reason)
+  } catch (err) {
+    reason = String(err)
+  }
+  if (reason !== null) await trail($, agentId, { at: await $.clock.now(), kind: 'error', text: 'not delivered: ' + reason })
   else await setRow($, agentId, r => (r.state === 'running' ? r : { ...r, state: 'running', endedAt: null, tool: 'reading your message' }))
   await animate($)
 }
@@ -377,11 +383,9 @@ export const register: Register = on => {
 
   on('classic.PermissionRequest', async ($, e, next) => {
     const id = e.agent_id ?? MAIN
-    await setRow($, id, r => ({ ...r, state: 'needs', tool: `asks: ${e.tool_name}` }))
-    const answer = await next(e)
-    if (answer.decision) await setRow($, id, r => (r.state === 'needs' ? { ...r, state: 'running' } : r))
-
-    return answer
+    await setRow($, id, r => ({ ...r, state: 'needs', tool: 'asks: ' + e.tool_name }))
+    // the decision stays with you: the row goes back to running when the tool call goes ahead (tool.call above)
+    return next(e)
   }).catch(($, e, next) => next(e))
 
   on('tool.call', async ($, e, next) => {
