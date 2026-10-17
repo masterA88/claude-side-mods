@@ -6,7 +6,7 @@ Author: Hilmi, https://master-hilmi.vercel.app/
 
 ![Mission Control and omnigraph on the right while three agents run](media/demo.gif)
 
-The clip runs 36 seconds. [Full-size MP4](media/demo.mp4).
+The clip runs 32 seconds. [Full-size MP4](media/demo.mp4).
 
 ## What you get
 
