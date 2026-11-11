@@ -238,6 +238,32 @@ async function applyMods($: EngineInterface, isOnNow: boolean) {
   await animate($)
 }
 
+// /mc-full zooms this session's tmux pane so Mission Control gets the whole window, and undoes only a zoom it made
+let zoomedPane: string | null = null
+
+async function tmuxZoomed($: EngineInterface, pane: string) {
+  const r = await $.process.run(['tmux', 'display-message', '-p', '-t', pane, '#{window_zoomed_flag}'], { timeoutMs: 2000 }).catch(() => null)
+  return r && r.exitCode === 0 ? r.stdout.trim() === '1' : null
+}
+
+async function zoomIn($: EngineInterface) {
+  const pane = await $.env.get('TMUX_PANE')
+  if (!pane) return 'not inside tmux, so no zoom'
+  const isZoomed = await tmuxZoomed($, pane)
+  if (isZoomed === null) return 'tmux did not answer, so no zoom'
+  if (isZoomed) return 'pane already zoomed'
+  const r = await $.process.run(['tmux', 'resize-pane', '-Z', '-t', pane], { timeoutMs: 2000 }).catch(() => null)
+  if (!r || r.exitCode !== 0) return 'tmux zoom refused'
+  zoomedPane = pane
+  return 'pane zoomed'
+}
+
+async function zoomOut($: EngineInterface) {
+  const pane = zoomedPane
+  zoomedPane = null
+  if (pane && (await tmuxZoomed($, pane))) await $.process.run(['tmux', 'resize-pane', '-Z', '-t', pane], { timeoutMs: 2000 }).catch(() => null)
+}
+
 async function followMods($: EngineInterface) {
   const isWanted = await modsWanted($)
   if (isWanted !== lastMods) await applyMods($, isWanted)
@@ -249,6 +275,7 @@ export const register: Register = on => {
     await $.command.register({ name: 'mod-on', description: 'Turn on the side mods: Mission Control (agents, plan, usage) and omnigraph' })
     await $.command.register({ name: 'mod-off', description: 'Turn the side mods off again' })
     await $.command.register({ name: 'mc', description: 'Show or hide the Mission Control pane' })
+    await $.command.register({ name: 'mc-full', description: 'Mission Control at full size: zooms this tmux pane and focuses the pane; run again to restore' })
     diskTimer?.cancel()
     void readDisk($)
     diskTimer = $.clock.every(60_000, () => void readDisk($))
@@ -303,6 +330,27 @@ export const register: Register = on => {
     await animate($)
 
     return { text: 'Mission Control shown.' }
+  })
+
+  on('command.run', { command: 'mc-full' }, async $ => {
+    const isShown = (await $.ui.panes()).some(p => p.id === PANE && p.isShown)
+    if (isShown && zoomedPane) {
+      await $.ui.close({ id: PANE })
+      await zoomOut($)
+      return { text: 'Mission Control closed, tmux layout restored.' }
+    }
+    const zoom = await zoomIn($)
+    await update($, isOn, () => true)
+    await $.ui.open({ id: PANE, title: 'Mission Control', focus: true })
+    await animate($)
+
+    return { text: `Mission Control full size (${zoom}). Run /mc-full again to restore.` }
+  })
+
+  // closing the pane any other way (Escape, /mc, /mod-off) also gives the tmux layout back
+  on('ui.close', async ($, e, next) => {
+    if (e.id === PANE && zoomedPane) await zoomOut($)
+    return next(e)
   })
 
   on('turn.start', async ($, e, next) => {

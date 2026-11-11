@@ -45,7 +45,7 @@ claude plugin install side-omnigraph-viz --marketplace masterA88/claude-side-mod
 
 In the desktop app, where `/plugin` does not run: click + next to the prompt box, then Plugins, Add marketplace with `masterA88/claude-side-mods`, then Add plugin for each of the three.
 
-The right pane opens unasked only when the terminal is wide enough (from about 144 columns), so give the window room or open it with `/mc`.
+The right pane opens unasked only when the terminal is wide enough (from about 144 columns), so give the window room or open it with `/mc`. Inside a tmux split, `/mc-full` zooms the pane first so the whole board fits.
 
 ## Commands
 
@@ -53,6 +53,7 @@ The right pane opens unasked only when the terminal is wide enough (from about 1
 |---|---|---|
 | `/mod-on`, `/mod-off` | mission-control | Turn the right side on or off for all three mods |
 | `/mc` | mission-control | Show or hide the Mission Control pane |
+| `/mc-full` | mission-control | Zoom this tmux pane and open Mission Control with focus; run again to restore the layout |
 | `/progress`, `/progress-on`, `/progress-off` | side-plan-progress | Show or hide the bars, or the separate Plan pane |
 | `/progress-clear`, `/progress-agents` | side-plan-progress | Clear all bars; fold or show the agent strips |
 | `/plan-progress-autoclose`, `/plan-progress-settings` | side-plan-progress | Let finished bars leave on their own; open the settings |
